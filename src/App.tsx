@@ -8,7 +8,6 @@ function App() {
   // store selected option index for each question id
   const [answers, setAnswers] = useState<Record<number, number | null>>({});
   const [hasTriedNext, setHasTriedNext] = useState(false);
-  const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [sendSuccess, setSendSuccess] = useState(false);
 
@@ -104,7 +103,6 @@ function App() {
   };
 
   const handleSend = async () => {
-    setIsSending(true);
     setSendError(null);
     setSendSuccess(false);
 
@@ -127,8 +125,6 @@ function App() {
       setSendSuccess(true);
     } catch (error) {
       setSendError('حدث خطأ أثناء إرسال البريد. حاول مرة أخرى.');
-    } finally {
-      setIsSending(false);
     }
   };
 
