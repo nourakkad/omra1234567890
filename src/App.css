@@ -298,21 +298,57 @@ body {
 }
 
 @media (max-width: 640px) {
+  .app-root {
+    padding: 12px;
+  }
+
   .card {
-    padding: 20px 18px 16px;
+    padding: 16px 14px 14px;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
   }
 
   .header h1 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+  }
+
+  .content h2 {
+    font-size: 1.05rem;
+  }
+
+  .helper {
+    font-size: 0.85rem;
+  }
+
+  .text-input,
+  .essay-input {
+    font-size: 0.9rem;
+    padding: 8px 10px;
+  }
+
+  .options-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .option-card {
+    padding: 8px 10px;
   }
 
   .footer {
     flex-direction: column-reverse;
     align-items: stretch;
+    margin-top: 12px;
+    gap: 8px;
   }
 
   .secondary-button,
   .primary-button {
     width: 100%;
+    padding: 9px 14px;
+    font-size: 0.9rem;
   }
 }

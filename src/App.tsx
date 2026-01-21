@@ -34,13 +34,16 @@ function App() {
   const handleNext = () => {
     setHasTriedNext(true);
     if (!canGoNext()) return;
+
+    const movingFromLastQuestionToReview =
+      !isNameStep && step === QUESTIONS.length;
+
     setStep((prev) => Math.min(prev + 1, totalSteps - 1));
     setHasTriedNext(false);
-  };
 
-  const handleBack = () => {
-    setStep((prev) => Math.max(prev - 1, 0));
-    setHasTriedNext(false);
+    if (movingFromLastQuestionToReview) {
+      void handleSend();
+    }
   };
 
   const handleAnswerChange = (id: number, optionIndex: number) => {
@@ -65,11 +68,17 @@ function App() {
     return { totalCorrect: correct, totalQuestionsWithKey: withKey };
   }, [answers]);
 
+  const markFrom100 =
+    totalQuestionsWithKey > 0
+      ? Math.round((totalCorrect / totalQuestionsWithKey) * 100)
+      : 0;
+
   const buildEmailBody = () => {
     const lines: string[] = [];
     lines.push(`اسم المتدرب: ${studentName}`);
     if (totalQuestionsWithKey > 0) {
       lines.push(`النتيجة: ${totalCorrect} من ${totalQuestionsWithKey}`);
+      lines.push(`الدرجة من 100: ${markFrom100} / 100`);
     }
     lines.push('');
     QUESTIONS.forEach((q) => {
@@ -209,8 +218,8 @@ function App() {
             <>
               <h2>مراجعة الإجابات</h2>
               <p className="helper">
-                تحقّق من اسمك وإجاباتك. عند الانتهاء اضغط &quot;إرسال عبر
-                البريد&quot; لفتح تطبيق البريد مع جميع البيانات جاهزة.
+                تحقّق من اسمك وإجاباتك. تم إرسال النتيجة تلقائياً إلى البريد
+                المسجّل.
               </p>
 
               <div className="review-block">
@@ -220,11 +229,13 @@ function App() {
 
               <div className="review-block score-block">
                 <h3>النتيجة النهائية</h3>
-                <p>
-                  {totalQuestionsWithKey > 0
-                    ? `${totalCorrect} من ${totalQuestionsWithKey}`
-                    : 'لم تحدد الإجابات الصحيحة في الاختبار بعد'}
-                </p>
+                
+                {totalQuestionsWithKey > 0 && (
+                  <p className="review-line">
+                    <strong>الدرجة : </strong>
+                    {markFrom100} / 100
+                  </p>
+                )}
               </div>
 
               {QUESTIONS.map((q) => (
@@ -270,38 +281,21 @@ function App() {
                   {sendError}
                 </p>
               )}
-
-              <button
-                type="button"
-                className="primary-button full-width"
-                onClick={handleSend}
-                disabled={isSending}
-              >
-                {isSending ? 'جاري الإرسال...' : 'إرسال الإجابات عبر البريد'}
-              </button>
             </>
           )}
         </div>
 
-        <div className="footer">
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={handleBack}
-            disabled={step === 0}
-          >
-            السابق
-          </button>
-          {!isReviewStep && (
+        {!isReviewStep && (
+          <div className="footer">
             <button
               type="button"
-              className="primary-button"
+              className="primary-button full-width"
               onClick={handleNext}
             >
               التالي
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
