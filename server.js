@@ -36,7 +36,7 @@ app.post('/api/send-result', async (req, res) => {
     await transporter.sendMail({
       from: fromEmail,
       to: toEmail,
-      subject: `نتيجة اختبار الديرما بن والميزوثيرابي - ${studentName}`,
+      subject: `تقييم لرحلة عمرك - ${studentName}`,
       text: bodyText,
     });
 

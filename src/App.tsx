@@ -74,7 +74,7 @@ function App() {
 
   const buildEmailBody = () => {
     const lines: string[] = [];
-    lines.push(`اسم المتدرب: ${studentName}`);
+    lines.push(`اسم المشارك: ${studentName}`);
     if (totalQuestionsWithKey > 0) {
       lines.push(`النتيجة: ${totalCorrect} من ${totalQuestionsWithKey}`);
       lines.push(`الدرجة من 100: ${markFrom100} / 100`);
@@ -87,7 +87,7 @@ function App() {
           ? q.options[selectedIndex]
           : 'لا توجد إجابة';
       lines.push(`السؤال: ${q.text}`);
-      lines.push(`إجابة المتدربة: ${selectedText}`);
+      lines.push(`إجابة المشارك: ${selectedText}`);
       if (typeof q.correctIndex === 'number') {
         const correctText = q.options[q.correctIndex];
         const isCorrect =
@@ -135,9 +135,10 @@ function App() {
     <div className="app-root">
       <div className="card">
         <div className="header">
-          <h1>اختبار الديرما بن والميزوثيرابي</h1>
+          <h1>تقييم لرحلة عمرك</h1>
           <p className="subtitle">
-            أجب عن الأسئلة بالترتيب ثم أرسلي النتيجة إلى المدربة عبر البريد.
+            أجب عن الأسئلة بالترتيب، ثم تُرسل إجاباتك تلقائياً إلى البريد عند
+            الانتهاء.
           </p>
           <div className="progress">
             <div className="progress-track">
@@ -157,9 +158,9 @@ function App() {
         <div className="content">
           {isNameStep && (
             <>
-              <h2>اسم المتدرب</h2>
+              <h2>اسم المشارك</h2>
               <p className="helper">
-                رجاءً اكتب اسمك الثلاثي قبل البدء في الاختبار.
+                رجاءً اكتب اسمك قبل البدء في الاستبيان.
               </p>
               <input
                 type="text"
@@ -178,7 +179,7 @@ function App() {
             <>
               <h2>{currentQuestion.text}</h2>
               <p className="helper">
-                اختر الإجابة الصحيحة. يجب اختيار خيار واحد على الأقل للمتابعة.
+                اختر خياراً واحداً للمتابعة.
               </p>
               <div className="options-grid">
                 {currentQuestion.options.map((opt, index) => {
@@ -214,25 +215,24 @@ function App() {
             <>
               <h2>مراجعة الإجابات</h2>
               <p className="helper">
-                تحقّق من اسمك وإجاباتك. تم إرسال النتيجة تلقائياً إلى البريد
+                تحقّق من اسمك وإجاباتك. تم إرسال الردود تلقائياً إلى البريد
                 المسجّل.
               </p>
 
               <div className="review-block">
-                <h3>اسم المتدرب</h3>
+                <h3>اسم المشارك</h3>
                 <p>{studentName || 'لم يكتب الاسم'}</p>
               </div>
 
-              <div className="review-block score-block">
-                <h3>النتيجة النهائية</h3>
-                
-                {totalQuestionsWithKey > 0 && (
+              {totalQuestionsWithKey > 0 && (
+                <div className="review-block score-block">
+                  <h3>النتيجة النهائية</h3>
                   <p className="review-line">
                     <strong>الدرجة : </strong>
                     {markFrom100} / 100
                   </p>
-                )}
-              </div>
+                </div>
+              )}
 
               {QUESTIONS.map((q) => (
                 <div key={q.id} className="review-block">
@@ -269,7 +269,7 @@ function App() {
 
               {sendSuccess && (
                 <p className="helper" style={{ color: '#16a34a' }}>
-                  تم إرسال النتائج إلى البريد بنجاح.
+                  تم إرسال الردود إلى البريد بنجاح.
                 </p>
               )}
               {sendError && (

@@ -36,7 +36,7 @@ exports.handler = async (event) => {
     await transporter.sendMail({
       from: fromEmail,
       to: toEmail,
-      subject: `نتيجة اختبار الديرما بن والميزوثيرابي - ${studentName}`,
+      subject: `تقييم لرحلة عمرك - ${studentName}`,
       text: bodyText,
     });
 
