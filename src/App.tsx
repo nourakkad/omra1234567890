@@ -1,19 +1,21 @@
 import React, { useMemo, useState } from 'react';
 import './App.css';
-import { QUESTIONS, McqQuestion } from './questions';
+import { QUESTIONS, isMcq, isRatingNotes, type Question } from './questions';
 
 function App() {
   const [step, setStep] = useState<number>(0); // 0 = name, 1..n = questions, n+1 = review
   const [studentName, setStudentName] = useState<string>('');
-  // store selected option index for each question id
+  // store selected option index for each MCQ question id
   const [answers, setAnswers] = useState<Record<number, number | null>>({});
+  const [ratingAnswers, setRatingAnswers] = useState<Record<number, number>>({});
+  const [notesAnswers, setNotesAnswers] = useState<Record<number, string>>({});
   const [hasTriedNext, setHasTriedNext] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [sendSuccess, setSendSuccess] = useState(false);
 
   const totalSteps = QUESTIONS.length + 2; // name + questions + review
 
-  const currentQuestion: McqQuestion | undefined =
+  const currentQuestion: Question | undefined =
     step >= 1 && step <= QUESTIONS.length ? QUESTIONS[step - 1] : undefined;
 
   const isNameStep = step === 0;
@@ -24,6 +26,9 @@ function App() {
       return studentName.trim().length > 0;
     }
     if (currentQuestion) {
+      if (isRatingNotes(currentQuestion)) {
+        return true;
+      }
       const selectedIndex = answers[currentQuestion.id];
       return typeof selectedIndex === 'number';
     }
@@ -56,6 +61,7 @@ function App() {
     let correct = 0;
     let withKey = 0;
     QUESTIONS.forEach((q) => {
+      if (!isMcq(q)) return;
       if (typeof q.correctIndex === 'number') {
         withKey += 1;
         const selected = answers[q.id];
@@ -81,6 +87,15 @@ function App() {
     }
     lines.push('');
     QUESTIONS.forEach((q) => {
+      if (isRatingNotes(q)) {
+        const r = ratingAnswers[q.id] ?? 5;
+        const n = (notesAnswers[q.id] ?? '').trim();
+        lines.push(`السؤال: ${q.text}`);
+        lines.push(`التقييم من 10: ${r}`);
+        lines.push(`ملاحظات: ${n || '—'}`);
+        lines.push('');
+        return;
+      }
       const selectedIndex = answers[q.id];
       const selectedText =
         typeof selectedIndex === 'number'
@@ -135,7 +150,7 @@ function App() {
     <div className="app-root">
       <div className="card">
         <div className="header">
-          <h1>تقييم لرحلة عمرك</h1>
+          <h1>تقييم لرحلة العمرة</h1>
           <p className="subtitle">
             أجب عن الأسئلة بالترتيب، ثم تُرسل إجاباتك تلقائياً إلى البريد عند
             الانتهاء.
@@ -175,7 +190,7 @@ function App() {
             </>
           )}
 
-          {currentQuestion && (
+          {currentQuestion && isMcq(currentQuestion) && (
             <>
               <h2>{currentQuestion.text}</h2>
               <p className="helper">
@@ -211,6 +226,69 @@ function App() {
             </>
           )}
 
+          {currentQuestion && isRatingNotes(currentQuestion) && (
+            <>
+              <h2>{currentQuestion.text}</h2>
+              <p className="helper">
+                قيّم تجربتك من 10، ويمكنك كتابة ملاحظات إضافية (اختياري).
+              </p>
+              <div className="rating-block">
+                <div className="rating-slider-row">
+                  <label
+                    className="rating-label"
+                    htmlFor={`rating-${currentQuestion.id}`}
+                  >
+                    التقييم من 10
+                  </label>
+                  <span className="rating-value" aria-live="polite">
+                    {ratingAnswers[currentQuestion.id] ?? 5}
+                  </span>
+                </div>
+                <input
+                  id={`rating-${currentQuestion.id}`}
+                  type="range"
+                  className="rating-range"
+                  min={1}
+                  max={10}
+                  step={1}
+                  value={ratingAnswers[currentQuestion.id] ?? 5}
+                  onChange={(e) =>
+                    setRatingAnswers((prev) => ({
+                      ...prev,
+                      [currentQuestion.id]: Number(e.target.value),
+                    }))
+                  }
+                />
+                <div className="rating-ticks" aria-hidden>
+                  {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                    <span key={n} className="rating-tick">
+                      {n}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <label
+                className="notes-label"
+                htmlFor={`notes-${currentQuestion.id}`}
+              >
+                ملاحظاتك
+              </label>
+              <textarea
+                id={`notes-${currentQuestion.id}`}
+                className="essay-input notes-textarea"
+                placeholder="اكتب أي ملاحظات أو اقتراحات…"
+                rows={5}
+                value={notesAnswers[currentQuestion.id] ?? ''}
+                onChange={(e) =>
+                  setNotesAnswers((prev) => ({
+                    ...prev,
+                    [currentQuestion.id]: e.target.value,
+                  }))
+                }
+              />
+            </>
+          )}
+
           {isReviewStep && (
             <>
               <h2>مراجعة الإجابات</h2>
@@ -234,38 +312,56 @@ function App() {
                 </div>
               )}
 
-              {QUESTIONS.map((q) => (
-                <div key={q.id} className="review-block">
-                  <h3>{q.text}</h3>
-                  <p className="review-line">
-                    <strong>إجابتك: </strong>
-                    {typeof answers[q.id] === 'number' ? (
-                      <>
-                        {q.options[answers[q.id] as number]}
-                        {typeof q.correctIndex === 'number' && (
-                          <>
-                            {answers[q.id] === q.correctIndex ? (
-                              <span className="badge badge-correct">
-                                صحيحة
-                              </span>
-                            ) : (
-                              <span className="badge badge-wrong">خاطئة</span>
-                            )}
-                          </>
-                        )}
-                      </>
-                    ) : (
-                      <span className="muted">لا توجد إجابة</span>
-                    )}
-                  </p>
-                  {typeof q.correctIndex === 'number' && (
+              {QUESTIONS.map((q) =>
+                isRatingNotes(q) ? (
+                  <div key={q.id} className="review-block">
+                    <h3>{q.text}</h3>
                     <p className="review-line">
-                      <strong>الإجابة الصحيحة: </strong>
-                      {q.options[q.correctIndex]}
+                      <strong>التقييم من 10: </strong>
+                      {ratingAnswers[q.id] ?? 5}
                     </p>
-                  )}
-                </div>
-              ))}
+                    <p className="review-line">
+                      <strong>الملاحظات: </strong>
+                      {(notesAnswers[q.id] ?? '').trim() ? (
+                        notesAnswers[q.id]
+                      ) : (
+                        <span className="muted">لا توجد ملاحظات</span>
+                      )}
+                    </p>
+                  </div>
+                ) : (
+                  <div key={q.id} className="review-block">
+                    <h3>{q.text}</h3>
+                    <p className="review-line">
+                      <strong>إجابتك: </strong>
+                      {typeof answers[q.id] === 'number' ? (
+                        <>
+                          {q.options[answers[q.id] as number]}
+                          {typeof q.correctIndex === 'number' && (
+                            <>
+                              {answers[q.id] === q.correctIndex ? (
+                                <span className="badge badge-correct">
+                                  صحيحة
+                                </span>
+                              ) : (
+                                <span className="badge badge-wrong">خاطئة</span>
+                              )}
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <span className="muted">لا توجد إجابة</span>
+                      )}
+                    </p>
+                    {typeof q.correctIndex === 'number' && (
+                      <p className="review-line">
+                        <strong>الإجابة الصحيحة: </strong>
+                        {q.options[q.correctIndex]}
+                      </p>
+                    )}
+                  </div>
+                )
+              )}
 
               {sendSuccess && (
                 <p className="helper" style={{ color: '#16a34a' }}>

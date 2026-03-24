@@ -8,8 +8,25 @@ export type McqQuestion = {
   correctIndex?: number | null;
 };
 
+export type RatingNotesQuestion = {
+  id: number;
+  text: string;
+  kind: 'ratingNotes';
+};
+
+export type Question = McqQuestion | RatingNotesQuestion;
+
+export function isMcq(q: Question): q is McqQuestion {
+  return (q as RatingNotesQuestion).kind !== 'ratingNotes';
+}
+
+export function isRatingNotes(q: Question): q is RatingNotesQuestion {
+  return (q as RatingNotesQuestion).kind === 'ratingNotes';
+}
+
 // عدّل هذا الملف لإضافة أو تغيير أسئلة تقييم الرحلة والخيارات.
-export const QUESTIONS: McqQuestion[] = [
+// السؤال الأخير: تقييم من 10 + ملاحظات (انظر App.tsx).
+export const QUESTIONS: Question[] = [
   {
     id: 1,
     text: 'هل كانت المواصلات مريحة؟',
@@ -49,5 +66,10 @@ export const QUESTIONS: McqQuestion[] = [
     id: 8,
     text: 'كيف تقييم جودة المواصلات؟',
     options: ['جيد جداً', 'وسط', 'سيء'],
+  },
+  {
+    id: 9,
+    text: 'التقييم العام والملاحظات',
+    kind: 'ratingNotes',
   },
 ];

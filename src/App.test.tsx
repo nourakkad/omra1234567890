@@ -4,5 +4,5 @@ import App from './App';
 
 test('renders trip review title', () => {
   render(<App />);
-  expect(screen.getByRole('heading', { name: /تقييم لرحلة عمرك/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /تقييم لرحلة العمرة/i })).toBeInTheDocument();
 });
